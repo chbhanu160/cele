@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Celebrare</title>
+  <style>
+    /* CSS for image preview */
+    #preview {
+      max-width: 300px;
+      max-height: 300px;
+    }
+
+    /* CSS for shape buttons */
+    .shape-button {
+      margin-right: 10px;
+    }
+
+    /* Responsive CSS */
+    @media only screen and (max-width: 600px) {
+      /* Adjust the layout for mobile devices */
+      #preview, #convertedImgContainer {
+        max-width: 100%;
+        max-height: 200px;
+      }
+      .shape-button {
+        display: block;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Image Shape Converter</h1>
+  
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="imageInput" accept="image/*" required>
+    <button type="submit">Upload Image</button>
+  </form>
+  
+  <h2>Select Shape:</h2>
+  <button class="shape-button" onclick="convertToOriginal()">Original</button>
+  <button class="shape-button" onclick="convertToShape('square')">Square</button>
+  <button class="shape-button" onclick="convertToShape('heart')">Heart</button>
+  <button class="shape-button" onclick="convertToShape('circle')">Circle</button>
+  <button class="shape-button" onclick="convertToShape('rectangle')">Rectangle</button>
+  
+  <h2>Converted Image:</h2>
+  <div id="convertedImgContainer"></div>
+  <button id="useImageBtn" onclick="useImage()" style="display: none;">Use This Image</button>
+  
+  <script>
+    // JavaScript for image preview and conversion
+    const imageInput = document.getElementById('imageInput');
+    const convertedImgContainer = document.getElementById('convertedImgContainer');
+    const useImageBtn = document.getElementById('useImageBtn');
+    let originalImageSrc = '';
+
+    // Handle image upload
+    document.getElementById('uploadForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const file = imageInput.files[0];
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function() {
+          originalImageSrc = reader.result;
+          convertToOriginal();
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Function to convert image to original shape
+    function convertToOriginal() {
+      convertedImgContainer.innerHTML = '';
+
+      const originalImg = document.createElement('img');
+      originalImg.src = originalImageSrc;
+      originalImg.style.maxWidth = '100%';
+      originalImg.style.maxHeight = '100%';
+
+      convertedImgContainer.appendChild(originalImg);
+      useImageBtn.style.display = 'block';
+    }
+
+    // Function to convert image to selected shape
+    function convertToShape(shape) {
+      convertedImgContainer.innerHTML = '';
+
+      const shapeImage = new Image();
+      shapeImage.src = `images/${shape}.png`; // Update the path to the shape images
+      shapeImage.onload = function() {
+        const canvas = document.createElement('canvas');
+        canvas.width = shapeImage.width;
+        canvas.height = shapeImage.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(shapeImage, 0, 0);
+
+        const image = new Image();
+        image.src = originalImageSrc;
+        image.onload = function() {
+          ctx.globalCompositeOperation = 'source-in';
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+          const convertedImg = document.createElement('img');
+          convertedImg.src = canvas.toDataURL();
+          convertedImg.style.maxWidth = '100%';
+          convertedImg.style.maxHeight = '100%';
+
+          convertedImgContainer.appendChild(convertedImg);
+          useImageBtn.style.display = 'block';
+        };
+      };
+    }
+
+    // Function to use the selected image
+    function useImage() {
+      const selectedImage = convertedImgContainer.querySelector('img');
+      alert('Image used!');
+      
+    }
+  </script>
+</body>
+</html>
